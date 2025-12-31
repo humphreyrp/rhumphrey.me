@@ -1,0 +1,43 @@
+baseURL = 'rhumphrey.me'
+languageCode = 'en-us'
+theme = "devise"
+relativeURLs = true
+enableEmoji = true
+copyright = "&copy; 2025, Robert Humphrey"
+
+[menu]
+  [[menu.main]]
+    identifier = "about"
+    name = "About"
+    title = "About"
+    url = "/about/"
+    weight = -110
+  [[menu.main]]
+    identifier = "posts"
+    name = "Posts"
+    title = "Posts"
+    url = "/post/"
+    weight = -100
+
+# Configuration Features
+[params]
+  header_title = "Forever In WIP"
+  description = "My blog for projects and learning"
+  header_subtitle = "A blog for documenting projects and random learnings."
+  home_image = "hard-hat-icon.jpg"
+  recent_posts = 5
+  mainSections = ["posts", "post", "blog"]
+  [params.style]
+    backgroundColor = "#e7e7df"
+    homeImageBorderColor = "#ffffff"
+    fontFamilyBase = "Ubuntu Mono"
+    fontColor = "#212529"
+  [[params.social]]
+    fa_icon = "fab fa-github fa-1x"
+    href = "http://github.com/humphreyrp"
+  [[params.social]]
+    fa_icon = "fab fa-linkedin-in fa-1x"
+    href = "https://www.linkedin.com/in/humphreyrp/"
+  [[params.social]]
+    fa_icon = "fa-regular fa-file-lines fa-1x"
+    href = "/assets/resume.pdf"
