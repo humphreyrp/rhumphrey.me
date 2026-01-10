@@ -1,7 +1,7 @@
 +++
 author = "Robert Humphrey"
 title = "Bridges & VLANs (pt 1)"
-date = "2025-12-30"
+date = "2026-01-09"
 +++
 
 In developing using virtual machines or containers it doesn't take long before you'll need to interact with a bridge network. They're extremely common as a base networking configuration when working with multiple VMs on a single host, but learning about bridge networks can get confusing quickly, and even moreso when interacting with other network features like VLANs. This post is intended to be the start of an overview of bridges and why they're useful when developing with virtual machines.
@@ -12,6 +12,9 @@ Before we talk about what a "bridge network" is, we need to talk about what a "b
 
 Engineers at [Digital Equipment Corp](https://spectrum.ieee.org/how-dec-engineers-saved-ethernet) in the 1980s came up with a way to help improve this reduction in performance, by splitting each LAN into separate sections that shared a single wire, also called a "collision domain". In between each collision domain would be a store-and-forward switch, which would be responsible for forwarding packets from one domain to their destination domain, but blocking packets if they were already on their destination domain. This effectively reduced the number of clients competing for access to the same medium, increasing throughput. The store-and-forward switches became known as bridges.
 
+![alt text](/digital-decbridge-90ts.jpg)
+<p style="text-align: center;"><em>An early ethernet bridge. The front coax connector goes to one LAN (called the backbone) and the top coax connector goes to the other (called the work group).</em></p>
+
 The layer in the OSI model that deals with MAC is the datalink layer (layer 2), so this is why it's common to hear that bridges are layer 2 devices that join networks.
 
 ### How do they work?
@@ -20,7 +23,7 @@ During operation it is the responsibility of the bridge to maintain a forwarding
 
 One interesting problem that quickly arises from the unicast flooding technique is that many networks have loops in them. In cases of loops and no mitigating techniques, packets flooded to all interfaces will loop back to the same bridge device again and again, bringing the network to a halt. 
 
-Layer 3 protocols like Internet Protocol (IP) keep track of "hop counts" as the packet passes through the network, allowing packets which exceed a prescribed time-to-live (TTL) to be dropped, which mitigates this issue. Layer 2 protocls were not built with this luxury. Instead, they rely primarily on the Spanning Tree Protocol (STP) to ensure that bridges are only connected in ways that avoid loops, and any links that would create a loop are dropped. Other techniques to avoid network failures due to flooding are techniques like Shortest Path Bridging and TRILL.
+Layer 3 protocols like Internet Protocol (IP) keep track of "hop counts" as the packet passes through the network, allowing packets which exceed a prescribed time-to-live (TTL) to be dropped, which mitigates this issue. Layer 2 protocols were not built with this luxury. Instead, they rely primarily on the [Spanning Tree Protocol (STP)](https://www.youtube.com/watch?v=N-25NoCOnP4) to ensure that bridges are only connected in ways that avoid loops, and any links that would create a loop are dropped. Other techniques to avoid network failures due to flooding are techniques like Shortest Path Bridging and TRILL.
 
 ### Bridges vs Switches
 
@@ -28,7 +31,7 @@ Switches are a modern evolution of bridge technology, with several important per
 
 ### Bridge Networks
 
-In the context of virtual machines a bridge network is one that creates a software defined bridge and allows virtual hosts to be added to it, as you would add a physical host to a switch. A bridge network can be configured to be completely isolated from the outside network, or connected to the network via the physical network interface.
+In the context of virtual machines a bridge network is one that creates a software defined bridge and allows virtual hosts to be added to it, as you would plug a machine into the port of a physical switch. A bridge network can be configured to be completely isolated from the outside network, or connected to the network via the physical network interface.
 
 The most basic tools to create an modify bridges come from the `iproute2` toolkit, which includes the `ip` utilities as well as the `bridge` utility. To create a new bridge called `br0`:
 
@@ -42,7 +45,7 @@ This creates a new bridge device called `br0` that other physical and virtual in
 # ip link set enp3s0 master br0
 ```
 
-Note that by setting the physical interface as a slave of the bridge, the bridge device is now the one that is associated with an IP address. This at first might seem odd: network switches typically do not have IP addresses, so why should my bridge interface? The To connect a virtual machine to the bridge, the attachment is typically done in Linux by KVM and configured in QEMU. 
+Note that by setting the physical interface as a slave of the bridge, the bridge device is now the one that is associated with an IP address. To connect a virtual machine to the bridge, the attachment is typically done in Linux by a virtualization library such as `libvirt`.
 
 Note that the software defined bridge operates just as a physical bridge does, including storing forwarding information. This information can be displayed via the `bridge` utility, and might look something like this:
 
@@ -59,4 +62,4 @@ This output is indicating that the bridge `br0` learned that MAC `62:fa:c3:85:4e
 
 ### To Be Continued...
 
-In part 2, we discuss VLANs and how they interact with virtual bridges.
+In part 2, we will discuss VLANs and how they interact with virtual bridges.

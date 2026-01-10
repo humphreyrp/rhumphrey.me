@@ -5,6 +5,11 @@ relativeURLs = true
 enableEmoji = true
 copyright = "&copy; 2025, Robert Humphrey"
 
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+
 [menu]
   [[menu.main]]
     identifier = "about"
