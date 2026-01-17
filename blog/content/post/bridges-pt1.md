@@ -4,7 +4,7 @@ title = "Bridges & VLANs (pt 1)"
 date = "2026-01-09"
 +++
 
-In developing using virtual machines or containers it doesn't take long before you'll need to interact with a bridge network. They're extremely common as a base networking configuration when working with multiple VMs on a single host, but learning about bridge networks can get confusing quickly, and even moreso when interacting with other network features like VLANs. This post is intended to be the start of an overview of bridges and why they're useful when developing with virtual machines.
+In developing using virtual machines or containers it doesn't take long before you'll need to interact with a bridge network, as they're very common as a base networking configuration when working with multiple VMs on a single host. However, learning about bridge networks can get confusing quickly, and even moreso when interacting with other network features like VLANs. This post is intended to be the start of an overview of bridges and why they're useful when developing with virtual machines.
 
 ### What are bridges?
 
@@ -60,6 +60,6 @@ Note that the software defined bridge operates just as a physical bridge does, i
 This output is indicating that the bridge `br0` learned that MAC `62:fa:c3:85:4e:e6` is associated with device `enp3s0` (our physical interface).
 
 
-### To Be Continued...
+### Up Next...
 
 In part 2, we will discuss VLANs and how they interact with virtual bridges.
