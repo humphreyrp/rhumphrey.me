@@ -4,19 +4,19 @@ title = "Bridges & VLANs (pt 2)"
 date = "2026-01-17"
 +++
 
-In the previous post we gave a brief overview of what bridges are, and how we use bridge networks when working with Virtual Machines. As hinted in the title, we now want to bring in VLANs, see how they interact with bridge networks, with the eventual goal of creating a VLAN-aware bridge network for multipe virtual machines in Linux.
+In the previous post we gave a brief overview of what bridges are, and how we use bridge networks when working with Virtual Machines. As hinted in the title, we now want to bring in VLANs, with the eventual goal of creating a VLAN-aware bridge network for multiple virtual machines in Linux.
 
 ### History of VLANs
 
-Unsurprisingly, VLANs have a history closely tied to bridges. As soon as networking bridges started being used to join LANs together at layer 2, network admins ran into problems when loops were created in their networks. Because of the previously discussed mechanics of device discovery via [unicast flooding](https://en.wikipedia.org/wiki/Unicast_flood), frames sent into a looped network without any mitigation can cause flooding of the network and bring it crashing down. This is where the [Spanning Tree Protocol (STP)](https://en.wikipedia.org/wiki/Spanning_Tree_Protocol) comes in, which allows bridges to calculate a single spanning tree for the entire network such that there is only a single route from any one node to another, eliminating loops. 
+Unsurprisingly, VLANs have a history closely tied to bridges. As soon as networking bridges started being used to join LANs together at layer 2, network administrators ran into problems when loops were created in their networks. Due to the previously discussed mechanics of device discovery via [unicast flooding](https://en.wikipedia.org/wiki/Unicast_flood), frames sent into a looped network without any mitigation can cause broadcast storms and bring the network crashing down. This is where the [Spanning Tree Protocol (STP)](https://en.wikipedia.org/wiki/Spanning_Tree_Protocol) comes in, which allows bridges to calculate a single spanning tree for the entire network such that there is only a single route from any one node to another, eliminating loops. 
 
-However, this comes at the cost of making routing less efficient, by requiring in many cases frames to take many more hops to reach a destination than strictly required by teh topology. It also making some paths much more highly trafficked than others, particuarly around central hubs. This second problem was what the original implementation of VLANs attempted to solve. By splitting the network into three different "colors" with certain bridges only carrying traffic for a specific color, three separate spanning trees were calculated by the bridges and traffic was more evenly distributed throughout the network. This was referred to at the time as "multi-tree bridging".
+However, this comes at the cost of making routing less efficient, by requiring in many cases frames to take many more hops to reach a destination than strictly required by the topology. It also making some paths much more highly trafficked than others, particuarly around central hubs. This second problem was particularly significant for the comparatively low-bandwidth bridges of the time, and was what the original implementation of VLANs attempted to solve. 
 
-The "colors" in the original VLAN implementation became the ethernet frame IEEE 802.1Q header, or VLAN tag.
+By splitting the network into three different "colors" with certain bridges only carrying traffic for a specific color, three separate spanning trees were calculated by the bridges and traffic was more evenly distributed throughout the network. This was referred to at the time as "multi-tree bridging". The "colors" in the original VLAN implementation became the ethernet frame IEEE 802.1Q header, or VLAN tag.
 
 ### Modern Uses
 
-With modern high bandwidth switches, the performance issues VLANs were originally designed to sovled have become less important. However, VLANs are still important to help with the following issues:
+With modern high bandwidth switches, the performance issues VLANs were originally designed to solved have become less important. However, VLANs are still important to help with the following issues:
 
 - Reducing broadcast domains
 - Enhancing Network security
@@ -26,7 +26,9 @@ Let's add some details to each of these.
 
 ##### Reducing Broadcast Domains
 
-There are many protocols that require using link-layer broadcasts to function. Broadcasts at the link-layer are frames that are distributed by all switches to all clients on every switch. For example, the Address Resolution Protocol (ARP) is designed to allow hosts on a network to determine the link-layer address of a particular network address, i.e. converting an IP address into a MAC address. in ARP, if a host does not know the MAC address of a particular IP it's trying to talk to, it will send an ARP ethernet frame broadcast to the entire network asking for the target host to respond with it's MAC. Most hosts on the network will simply ignore this, but only after parsing the packet and checking to see if it's them the request is looking for. The larger the network is, the more resources are consumed in this process.
+There are many protocols that require using link-layer broadcasts to function. Broadcasts at the link-layer are frames that are distributed by all switches to all clients on every switch. For example, the Address Resolution Protocol (ARP) is designed to allow hosts on a network to determine the link-layer address of a particular network address, i.e. converting an IP address into a MAC address. in ARP, if a host does not know the MAC address of a particular IP it's trying to talk to, it will send an ARP ethernet frame broadcast to the entire network asking for the target host to respond with it's MAC. 
+
+Most hosts on the network will simply ignore ARP frames not targetted at them, but only after parsing the packet to check the target. The larger the network is, the more resources are consumed in this process. 
 
 If a network is divided into VLANs, the broadcasted ethernet frames are not sent to devices across VLANs. The only way to communicate across VLANs is via a protocol-layer router, which will filter out broadcast traffic. This significantly reduces the network congestion due to these broadcast protocols.
 
